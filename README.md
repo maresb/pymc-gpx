@@ -1,6 +1,6 @@
 # pymc-gpx
 
-[![PyPI - Version](https://img.shields.io/pypi/v/pymc-experimental-manifold-gp.svg)](https://pypi.org/project/pymc-experimental-manifold-gp)
+[![PyPI - Version](https://img.shields.io/pypi/v/pymc-gpx.svg)](https://pypi.org/project/pymc-gpx)
 
 -----
 
