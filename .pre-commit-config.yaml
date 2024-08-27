@@ -1,0 +1,52 @@
+# This is for the "pre-commit" tool, which enforces checks before local commits are
+# allowed. <https://pre-commit.com/>
+
+default_language_version:
+  python: python3
+
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.6.2
+  hooks:
+  - id: ruff
+    args: [--fix, --exit-non-zero-on-fix]
+  - id: ruff-format
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.6.0
+  hooks:
+    # Protect specific branches from direct commits.
+  - id: no-commit-to-branch
+    args: [--branch=main]
+
+    # Trims trailing whitespace.
+  - id: trailing-whitespace
+
+    # Prevent giant files from being committed.
+  - id: check-added-large-files
+
+    # Check for files that contain merge conflict strings.
+  - id: check-merge-conflict
+
+    # Attempts to load all yaml files to verify syntax.
+  - id: check-yaml
+
+    # Makes sure files end in a newline and only a newline.
+  - id: end-of-file-fixer
+
+    # Replaces or checks mixed line ending.
+  - id: mixed-line-ending
+    args: [--fix=no]
+
+  # Format YAML files.
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.14.0
+  hooks:
+  - id: pretty-format-yaml
+    args: [--autofix, --indent, '2']
+
+- repo: https://github.com/ComPWA/mirrors-taplo
+  rev: v0.9.3
+  hooks:
+  - id: taplo-format
+  - id: taplo-lint

@@ -1,0 +1,70 @@
+name: Run checks
+
+on:
+  pull_request:
+    branches:
+    - main
+  push:
+    branches:
+    - main
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    name: Run gpx-specific tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - uses: prefix-dev/setup-pixi@v0.8.1
+      with:
+        pixi-version: v0.26.1
+        cache: true
+        locked: false
+    - run: pixi run test
+
+  pytest-old:
+    name: Run old PyMC tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - uses: prefix-dev/setup-pixi@v0.8.1
+      with:
+        pixi-version: v0.26.1
+        cache: true
+        locked: false
+    - run: pixi run test-old
+
+  mypy:
+    name: Run mypy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - uses: prefix-dev/setup-pixi@v0.8.1
+      with:
+        pixi-version: v0.26.1
+        cache: true
+        locked: false
+    - run: pixi run mypy
+
+  lockfile-up-to-date:
+    name: Check if lockfile is up-to-date
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - uses: prefix-dev/setup-pixi@v0.8.1
+      with:
+        pixi-version: v0.26.1
+        cache: true
+        locked: true
