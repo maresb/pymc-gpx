@@ -24,6 +24,8 @@ import pymc as pm
 
 from pymc.math import cartesian, kronecker
 
+import gpx.old
+
 
 class TestCovAdd:
     def test_symadd_cov(self):
@@ -771,7 +773,9 @@ class TestScaledCov:
 
         with pm.Model() as model:
             cov_m52 = gpx.old.cov.Matern52(1, 0.2)
-            cov = gpx.old.cov.ScaledCov(1, scaling_func=scaling_func, args=(2, -1), cov_func=cov_m52)
+            cov = gpx.old.cov.ScaledCov(
+                1, scaling_func=scaling_func, args=(2, -1), cov_func=cov_m52
+            )
         K = cov(X).eval()
         npt.assert_allclose(K[0, 1], 3.00686, atol=1e-3)
         K = cov(X, X).eval()

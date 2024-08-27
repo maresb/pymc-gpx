@@ -22,6 +22,8 @@ from scipy.spatial import distance
 
 import pymc as pm
 
+import gpx.old
+
 
 def build_mmd_func(sample1, sample2):
     """Build a PyTensor function that calculates the minimum mean discrepancy (MMD) statistic."""

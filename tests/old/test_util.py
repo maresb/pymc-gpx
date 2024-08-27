@@ -19,6 +19,8 @@ import pytest
 
 import pymc as pm
 
+import gpx.old
+
 
 class TestPlotGP:
     def test_plot_gp_dist(self):

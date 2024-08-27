@@ -17,6 +17,8 @@ import numpy.testing as npt
 
 import pymc as pm
 
+import gpx.old
+
 
 class TestZeroMean:
     def test_value(self):

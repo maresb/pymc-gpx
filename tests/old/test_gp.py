@@ -23,6 +23,8 @@ import pymc as pm
 
 from pymc.math import cartesian
 
+import gpx.old
+
 
 class TestSigmaParams:
     def setup_method(self):
@@ -177,7 +179,11 @@ class TestGPAdditive:
             gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3]),
             gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3]),
         )
-        self.means = (gpx.old.mean.Constant(0.5), gpx.old.mean.Constant(0.5), gpx.old.mean.Constant(0.5))
+        self.means = (
+            gpx.old.mean.Constant(0.5),
+            gpx.old.mean.Constant(0.5),
+            gpx.old.mean.Constant(0.5),
+        )
 
     def testAdditiveMarginal(self):
         with pm.Model() as model1:
@@ -263,7 +269,9 @@ class TestGPAdditive:
             model1_logp = model1.compile_logp()({"fsum": self.y})
 
         with pm.Model() as model2:
-            gptot = gpx.old.Latent(mean_func=reduce(add, self.means), cov_func=reduce(add, self.covs))
+            gptot = gpx.old.Latent(
+                mean_func=reduce(add, self.means), cov_func=reduce(add, self.covs)
+            )
             fsum = gptot.prior("fsum", self.X, reparameterize=False)
             model2_logp = model2.compile_logp()({"fsum": self.y})
         npt.assert_allclose(model1_logp, model2_logp, atol=0, rtol=1e-2)
