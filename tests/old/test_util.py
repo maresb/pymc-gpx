@@ -28,7 +28,7 @@ class TestPlotGP:
         X = 100
         S = 500
         fig, ax = plt.subplots()
-        pm.gp.util.plot_gp_dist(
+        gpx.old.util.plot_gp_dist(
             ax, x=np.linspace(0, 50, X), samples=np.random.normal(np.arange(X), size=(S, X))
         )
         plt.close()
@@ -44,7 +44,7 @@ class TestPlotGP:
         samples[15, 3] = np.nan
         fig, ax = plt.subplots()
         with pytest.warns(UserWarning):
-            pm.gp.util.plot_gp_dist(ax, x=np.linspace(0, 50, X), samples=samples)
+            gpx.old.util.plot_gp_dist(ax, x=np.linspace(0, 50, X), samples=samples)
         plt.close()
         pass
 
@@ -58,16 +58,16 @@ class TestKmeansInducing:
 
     def test_kmeans(self):
         X = self.x[:, None]
-        Xu = pm.gp.util.kmeans_inducing_points(2, X).flatten()
+        Xu = gpx.old.util.kmeans_inducing_points(2, X).flatten()
         npt.assert_allclose(np.asarray(self.centers), np.sort(Xu), rtol=0.05)
 
         X = pt.as_tensor_variable(self.x[:, None])
-        Xu = pm.gp.util.kmeans_inducing_points(2, X).flatten()
+        Xu = gpx.old.util.kmeans_inducing_points(2, X).flatten()
         npt.assert_allclose(np.asarray(self.centers), np.sort(Xu), rtol=0.05)
 
     def test_kmeans_raises(self):
         with pytest.raises(TypeError):
-            Xu = pm.gp.util.kmeans_inducing_points(2, "str is the wrong type").flatten()
+            Xu = gpx.old.util.kmeans_inducing_points(2, "str is the wrong type").flatten()
 
 
 class TestReplaceWithValues:
@@ -77,7 +77,7 @@ class TestReplaceWithValues:
             b = pm.Normal("b", mu=a)
             c = a * b
 
-        (c_val,) = pm.gp.util.replace_with_values(
+        (c_val,) = gpx.old.util.replace_with_values(
             [c], replacements={"a": 2, "b": 3, "x": 100}, model=model
         )
         assert c_val == np.array(6.0)
@@ -87,7 +87,7 @@ class TestReplaceWithValues:
             a = pt.as_tensor_variable(2.0)
             b = 1.0 + a
             c = a * b
-            (c_val,) = pm.gp.util.replace_with_values([c], replacements={"x": 100})
+            (c_val,) = gpx.old.util.replace_with_values([c], replacements={"x": 100})
         assert c_val == np.array(6.0)
 
     def test_missing_input(self):
@@ -97,6 +97,6 @@ class TestReplaceWithValues:
             c = a * b
 
         with pytest.raises(ValueError):
-            (c_val,) = pm.gp.util.replace_with_values(
+            (c_val,) = gpx.old.util.replace_with_values(
                 [c], replacements={"a": 2, "x": 100}, model=model
             )

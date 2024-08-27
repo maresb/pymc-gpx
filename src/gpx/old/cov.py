@@ -937,8 +937,8 @@ class WrappedPeriodic(Covariance):
 
     .. code:: python
 
-        exp_quad = pm.gp.cov.ExpQuad(1, ls=0.5)
-        cov = pm.gp.cov.WrappedPeriodic(exp_quad, period=5)
+        exp_quad = gpx.old.cov.ExpQuad(1, ls=0.5)
+        cov = gpx.old.cov.WrappedPeriodic(exp_quad, period=5)
 
     References
     ----------

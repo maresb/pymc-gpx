@@ -22,7 +22,7 @@ class TestZeroMean:
     def test_value(self):
         X = np.linspace(0, 1, 10)[:, None]
         with pm.Model() as model:
-            zero_mean = pm.gp.mean.Zero()
+            zero_mean = gpx.old.mean.Zero()
         M = zero_mean(X).eval()
         assert np.all(M == 0)
         assert M.shape == (10,)
@@ -32,7 +32,7 @@ class TestConstantMean:
     def test_value(self):
         X = np.linspace(0, 1, 10)[:, None]
         with pm.Model() as model:
-            const_mean = pm.gp.mean.Constant(6)
+            const_mean = gpx.old.mean.Constant(6)
         M = const_mean(X).eval()
         assert np.all(M == 6)
         assert M.shape == (10,)
@@ -42,7 +42,7 @@ class TestLinearMean:
     def test_value(self):
         X = np.linspace(0, 1, 10)[:, None]
         with pm.Model() as model:
-            linear_mean = pm.gp.mean.Linear(2, 0.5)
+            linear_mean = gpx.old.mean.Linear(2, 0.5)
         M = linear_mean(X).eval()
         npt.assert_allclose(M[1], 0.7222, atol=1e-3)
         assert M.shape == (10,)
@@ -52,8 +52,8 @@ class TestAddProdMean:
     def test_add(self):
         X = np.linspace(0, 1, 10)[:, None]
         with pm.Model() as model:
-            mean1 = pm.gp.mean.Linear(coeffs=2, intercept=0.5)
-            mean2 = pm.gp.mean.Constant(2)
+            mean1 = gpx.old.mean.Linear(coeffs=2, intercept=0.5)
+            mean2 = gpx.old.mean.Constant(2)
             mean = mean1 + mean2 + mean2
         M = mean(X).eval()
         npt.assert_allclose(M[1], 0.7222 + 2 + 2, atol=1e-3)
@@ -61,8 +61,8 @@ class TestAddProdMean:
     def test_prod(self):
         X = np.linspace(0, 1, 10)[:, None]
         with pm.Model() as model:
-            mean1 = pm.gp.mean.Linear(coeffs=2, intercept=0.5)
-            mean2 = pm.gp.mean.Constant(2)
+            mean1 = gpx.old.mean.Linear(coeffs=2, intercept=0.5)
+            mean2 = gpx.old.mean.Constant(2)
             mean = mean1 * mean2 * mean2
         M = mean(X).eval()
         npt.assert_allclose(M[1], 0.7222 * 2 * 2, atol=1e-3)
@@ -72,8 +72,8 @@ class TestAddProdMean:
         A = np.array([1, 2, 3])
         b = 10
         with pm.Model() as model:
-            mean1 = pm.gp.mean.Linear(coeffs=A, intercept=b)
-            mean2 = pm.gp.mean.Constant(2)
+            mean1 = gpx.old.mean.Linear(coeffs=A, intercept=b)
+            mean2 = gpx.old.mean.Constant(2)
             mean = mean1 + mean2 + mean2
         M = mean(X).eval()
         npt.assert_allclose(M[1], 10.8965 + 2 + 2, atol=1e-3)
@@ -83,8 +83,8 @@ class TestAddProdMean:
         A = np.array([1, 2, 3])
         b = 10
         with pm.Model() as model:
-            mean1 = pm.gp.mean.Linear(coeffs=A, intercept=b)
-            mean2 = pm.gp.mean.Constant(2)
+            mean1 = gpx.old.mean.Linear(coeffs=A, intercept=b)
+            mean2 = gpx.old.mean.Constant(2)
             mean = mean1 * mean2 * mean2
         M = mean(X).eval()
         npt.assert_allclose(M[1], 10.8965 * 2 * 2, atol=1e-3)

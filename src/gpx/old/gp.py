@@ -23,9 +23,9 @@ from pytensor.tensor.linalg import cholesky, eigh, solve_triangular
 
 import pymc as pm
 
-from pymc.gp.cov import BaseCovariance, Constant
-from pymc.gp.mean import Zero
-from pymc.gp.util import (
+from gpx.old.cov import BaseCovariance, Constant
+from gpx.old.mean import Zero
+from gpx.old.util import (
     JITTER_DEFAULT,
     conditioned_vars,
     replace_with_values,
@@ -113,9 +113,9 @@ class Latent(Base):
 
     Parameters
     ----------
-    mean_func : Mean, default ~pymc.gp.mean.Zero
+    mean_func : Mean, default ~gpx.old.mean.Zero
         The mean function.
-    cov_func : 2D array-like, or Covariance, default ~pymc.gp.cov.Constant
+    cov_func : 2D array-like, or Covariance, default ~gpx.old.cov.Constant
         The covariance function.
 
     Examples
@@ -127,10 +127,10 @@ class Latent(Base):
 
         with pm.Model() as model:
             # Specify the covariance function.
-            cov_func = pm.gp.cov.ExpQuad(1, ls=0.1)
+            cov_func = gpx.old.cov.ExpQuad(1, ls=0.1)
 
             # Specify the GP.  The default mean function is `Zero`.
-            gp = pm.gp.Latent(cov_func=cov_func)
+            gp = gpx.old.Latent(cov_func=cov_func)
 
             # Place a GP prior over the function f.
             f = gp.prior("f", X=X)
@@ -275,9 +275,9 @@ class TP(Latent):
 
     Parameters
     ----------
-    mean_func : Mean, default ~pymc.gp.mean.Zero
+    mean_func : Mean, default ~gpx.old.mean.Zero
         The mean function.
-    scale_func : 2D array-like, or Covariance, default ~pymc.gp.cov.Constant
+    scale_func : 2D array-like, or Covariance, default ~gpx.old.cov.Constant
         The covariance function.
     cov_func : 2D array-like, or Covariance, default None
         Deprecated, previous version of "scale_func"
@@ -406,9 +406,9 @@ class Marginal(Base):
 
     Parameters
     ----------
-    mean_func : Mean, default ~pymc.gp.mean.Zero
+    mean_func : Mean, default ~gpx.old.mean.Zero
         The mean function.
-    cov_func : 2D array-like, or Covariance, default ~pymc.gp.cov.Constant
+    cov_func : 2D array-like, or Covariance, default ~gpx.old.cov.Constant
         The covariance function.
 
     Examples
@@ -420,10 +420,10 @@ class Marginal(Base):
 
         with pm.Model() as model:
             # Specify the covariance function.
-            cov_func = pm.gp.cov.ExpQuad(1, ls=0.1)
+            cov_func = gpx.old.cov.ExpQuad(1, ls=0.1)
 
             # Specify the GP.  The default mean function is `Zero`.
-            gp = pm.gp.Marginal(cov_func=cov_func)
+            gp = gpx.old.Marginal(cov_func=cov_func)
 
             # Place a GP prior over the function f.
             sigma = pm.HalfCauchy("sigma", beta=3)
@@ -469,7 +469,7 @@ class Marginal(Base):
         y : array-like
             Data that is the sum of the function with the GP prior and Gaussian
             noise.  Must have shape `(n, )`.
-        sigma : float, Variable, or Covariance, default ~pymc.gp.cov.WhiteNoise
+        sigma : float, Variable, or Covariance, default ~gpx.old.cov.WhiteNoise
             Standard deviation of the Gaussian noise.  Can also be a Covariance for
             non-white noise.
         noise : float, Variable, or Covariance, optional
@@ -485,7 +485,7 @@ class Marginal(Base):
         """
         sigma = _handle_sigma_noise_parameters(sigma=sigma, noise=noise)
 
-        noise_func = sigma if isinstance(sigma, BaseCovariance) else pm.gp.cov.WhiteNoise(sigma)
+        noise_func = sigma if isinstance(sigma, BaseCovariance) else gpx.old.cov.WhiteNoise(sigma)
         mu, cov = self._build_marginal_likelihood(X=X, noise_func=noise_func, jitter=jitter)
         self.X = X
         self.y = y
@@ -517,7 +517,9 @@ class Marginal(Base):
 
         if all(val in given for val in ["X", "y", "sigma"]):
             X, y, sigma = given["X"], given["y"], given["sigma"]
-            noise_func = sigma if isinstance(sigma, BaseCovariance) else pm.gp.cov.WhiteNoise(sigma)
+            noise_func = (
+                sigma if isinstance(sigma, BaseCovariance) else gpx.old.cov.WhiteNoise(sigma)
+            )
         else:
             X, y, noise_func = self.X, self.y, self.sigma
         return X, y, noise_func, cov_total, mean_total
@@ -673,9 +675,9 @@ class MarginalApprox(Marginal):
 
     Parameters
     ----------
-    mean_func : Mean, default ~pymc.gp.mean.Zero
+    mean_func : Mean, default ~gpx.old.mean.Zero
         The mean function.
-    cov_func : 2D array-like, or Covariance, default ~pymc.gp.cov.Constant
+    cov_func : 2D array-like, or Covariance, default ~gpx.old.cov.Constant
         The covariance function.
     approx : str, default 'VFE'
         The approximation to use.  Must be one of `VFE`, `FITC` or `DTC`.
@@ -692,10 +694,10 @@ class MarginalApprox(Marginal):
 
         with pm.Model() as model:
             # Specify the covariance function.
-            cov_func = pm.gp.cov.ExpQuad(1, ls=0.1)
+            cov_func = gpx.old.cov.ExpQuad(1, ls=0.1)
 
             # Specify the GP.  The default mean function is `Zero`.
-            gp = pm.gp.MarginalApprox(cov_func=cov_func, approx="FITC")
+            gp = gpx.old.MarginalApprox(cov_func=cov_func, approx="FITC")
 
             # Place a GP prior over the function f.
             sigma = pm.HalfCauchy("sigma", beta=3)
@@ -920,9 +922,9 @@ class LatentKron(Base):
 
     Parameters
     ----------
-    mean_func : Mean, default ~pymc.gp.mean.Zero
+    mean_func : Mean, default ~gpx.old.mean.Zero
         The mean function.
-    cov_funcs : list of Covariance, default [~pymc.gp.cov.Constant]
+    cov_funcs : list of Covariance, default [~gpx.old.cov.Constant]
         The covariance functions that compose the tensor (Kronecker) product.
 
     Examples
@@ -935,11 +937,11 @@ class LatentKron(Base):
         Xs = [X1, X2]
         with pm.Model() as model:
             # Specify the covariance functions for each Xi
-            cov_func1 = pm.gp.cov.ExpQuad(1, ls=0.1)  # Must accept X1 without error
-            cov_func2 = pm.gp.cov.ExpQuad(1, ls=0.3)  # Must accept X2 without error
+            cov_func1 = gpx.old.cov.ExpQuad(1, ls=0.1)  # Must accept X1 without error
+            cov_func2 = gpx.old.cov.ExpQuad(1, ls=0.3)  # Must accept X2 without error
 
             # Specify the GP.  The default mean function is `Zero`.
-            gp = pm.gp.LatentKron(cov_funcs=[cov_func1, cov_func2])
+            gp = gpx.old.LatentKron(cov_funcs=[cov_func1, cov_func2])
 
             # ...
 
@@ -960,7 +962,7 @@ class LatentKron(Base):
             self.cov_funcs = list(cov_funcs)
         except TypeError:
             self.cov_funcs = [cov_funcs]
-        cov_func = pm.gp.cov.Kron(self.cov_funcs)
+        cov_func = gpx.old.cov.Kron(self.cov_funcs)
         super().__init__(mean_func=mean_func, cov_func=cov_func)
 
     def __add__(self, other):
@@ -1076,9 +1078,9 @@ class MarginalKron(Base):
 
     Parameters
     ----------
-    mean_func : Mean, default ~pymc.gp.mean.Zero
+    mean_func : Mean, default ~gpx.old.mean.Zero
         The mean function.
-    cov_funcs : list of Covariance, default [~pymc.gp.cov.Constant]
+    cov_funcs : list of Covariance, default [~gpx.old.cov.Constant]
         The covariance functions that compose the tensor (Kronecker) product.
 
     Examples
@@ -1092,11 +1094,11 @@ class MarginalKron(Base):
         y = np.random.randn(len(X1)*len(X2))  # toy data
         with pm.Model() as model:
             # Specify the covariance functions for each Xi
-            cov_func1 = pm.gp.cov.ExpQuad(1, ls=0.1)  # Must accept X1 without error
-            cov_func2 = pm.gp.cov.ExpQuad(1, ls=0.3)  # Must accept X2 without error
+            cov_func1 = gpx.old.cov.ExpQuad(1, ls=0.1)  # Must accept X1 without error
+            cov_func2 = gpx.old.cov.ExpQuad(1, ls=0.3)  # Must accept X2 without error
 
             # Specify the GP.  The default mean function is `Zero`.
-            gp = pm.gp.MarginalKron(cov_funcs=[cov_func1, cov_func2])
+            gp = gpx.old.MarginalKron(cov_funcs=[cov_func1, cov_func2])
 
             # Place a GP prior over the function f.
             sigma = pm.HalfCauchy("sigma", beta=3)
@@ -1121,7 +1123,7 @@ class MarginalKron(Base):
             self.cov_funcs = list(cov_funcs)
         except TypeError:
             self.cov_funcs = [cov_funcs]
-        cov_func = pm.gp.cov.Kron(self.cov_funcs)
+        cov_func = gpx.old.cov.Kron(self.cov_funcs)
         super().__init__(mean_func=mean_func, cov_func=cov_func)
 
     def __add__(self, other):

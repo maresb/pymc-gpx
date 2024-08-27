@@ -23,9 +23,9 @@ import pytensor.tensor as pt
 
 import pymc as pm
 
-from pymc.gp.cov import Covariance, Periodic
-from pymc.gp.gp import Base
-from pymc.gp.mean import Mean, Zero
+from gpx.old.cov import Covariance, Periodic
+from gpx.old.gp import Base
+from gpx.old.mean import Mean, Zero
 
 TensorLike = np.ndarray | pt.TensorVariable
 
@@ -221,7 +221,7 @@ class HSGP(Base):
         with pm.Model() as model:
             # Specify the covariance function.
             # Three input dimensions, but we only want to use the last two.
-            cov_func = pm.gp.cov.ExpQuad(3, ls=0.1, active_dims=[1, 2])
+            cov_func = gpx.old.cov.ExpQuad(3, ls=0.1, active_dims=[1, 2])
 
             # Specify the HSGP.
             # Use 25 basis vectors across each active dimension for a total of 25 * 25 = 625.
@@ -230,7 +230,7 @@ class HSGP(Base):
             # In this example the data lie between zero and one,
             # so the boundaries occur at -1.5 and 2.5.  The data, both for
             # training and prediction should reside well within that boundary..
-            gp = pm.gp.HSGP(m=[25, 25], c=4.0, cov_func=cov_func)
+            gp = gpx.old.HSGP(m=[25, 25], c=4.0, cov_func=cov_func)
 
             # Place a GP prior over the function f.
             f = gp.prior("f", X=X)
@@ -358,11 +358,11 @@ class HSGP(Base):
             with pm.Model() as model:
                 eta = pm.Exponential("eta", lam=1.0)
                 ell = pm.InverseGamma("ell", mu=5.0, sigma=5.0)
-                cov_func = eta**2 * pm.gp.cov.ExpQuad(1, ls=ell)
+                cov_func = eta**2 * gpx.old.cov.ExpQuad(1, ls=ell)
 
                 # m = [200] means 200 basis vectors for the first dimension
                 # L = [10] means the approximation is valid from Xs = [-10, 10]
-                gp = pm.gp.HSGP(m=[200], L=[10], cov_func=cov_func)
+                gp = gpx.old.HSGP(m=[200], L=[10], cov_func=cov_func)
 
                 # Set X as Data so it can be mutated later, and then pass it to the GP
                 X = pm.Data("X", X)
@@ -428,7 +428,7 @@ class HSGP(Base):
     ):  # type: ignore
         R"""
         Returns the (approximate) GP prior distribution evaluated over the input locations `X`.
-        For usage examples, refer to `pm.gp.Latent`.
+        For usage examples, refer to `gpx.old.Latent`.
 
         Parameters
         ----------
@@ -544,10 +544,10 @@ class HSGPPeriodic(Base):
         with pm.Model() as model:
             # Specify the covariance function, only for the 1-D case
             scale = pm.HalfNormal("scale", 10)
-            cov_func = pm.gp.cov.Periodic(1, period=1, ls=0.1)
+            cov_func = gpx.old.cov.Periodic(1, period=1, ls=0.1)
 
             # Specify the approximation with 25 basis vectors
-            gp = pm.gp.HSGPPeriodic(m=25, scale=scale, cov_func=cov_func)
+            gp = gpx.old.HSGPPeriodic(m=25, scale=scale, cov_func=cov_func)
 
             # Place a GP prior over the function f.
             f = gp.prior("f", X=X)
@@ -634,10 +634,10 @@ class HSGPPeriodic(Base):
 
             with pm.Model() as model:
                 scale = pm.HalfNormal("scale", 10)
-                cov_func = pm.gp.cov.Periodic(1, period=1.0, ls=2.0)
+                cov_func = gpx.old.cov.Periodic(1, period=1.0, ls=2.0)
 
                 # m=200 means 200 basis vectors
-                gp = pm.gp.HSGPPeriodic(m=200, scale=scale, cov_func=cov_func)
+                gp = gpx.old.HSGPPeriodic(m=200, scale=scale, cov_func=cov_func)
 
                 # Set X as Data so it can be mutated later, and then pass it to the GP
                 X = pm.Data("X", X)
@@ -691,7 +691,7 @@ class HSGPPeriodic(Base):
     ):  # type: ignore
         R"""
         Returns the (approximate) GP prior distribution evaluated over the input locations `X`.
-        For usage examples, refer to `pm.gp.Latent`.
+        For usage examples, refer to `gpx.old.Latent`.
 
         Parameters
         ----------

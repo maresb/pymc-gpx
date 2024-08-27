@@ -12,8 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from pymc.gp import cov, mean, util
-from pymc.gp.gp import (
+from gpx.old import cov, mean, util
+from gpx.old.gp import (
     TP,
     Latent,
     LatentKron,
@@ -22,4 +22,4 @@ from pymc.gp.gp import (
     MarginalKron,
     MarginalSparse,
 )
-from pymc.gp.hsgp_approx import HSGP, HSGPPeriodic
+from gpx.old.hsgp_approx import HSGP, HSGPPeriodic

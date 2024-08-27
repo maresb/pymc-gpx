@@ -32,9 +32,9 @@ class TestSigmaParams:
         self.y = np.random.normal(0.25 * self.x, 0.1)
 
         with pm.Model() as self.model:
-            cov_func = pm.gp.cov.Linear(1, c=0.0)
+            cov_func = gpx.old.cov.Linear(1, c=0.0)
             c = pm.Normal("c", mu=20.0, sigma=100.0)
-            mean_func = pm.gp.mean.Constant(c)
+            mean_func = gpx.old.mean.Constant(c)
             self.gp = self.gp_implementation(mean_func=mean_func, cov_func=cov_func)
             self.sigma = pm.HalfNormal("sigma", sigma=100)
 
@@ -42,7 +42,7 @@ class TestSigmaParams:
 class TestMarginalSigmaParams(TestSigmaParams):
     R"""Tests for the deprecation warnings and raising ValueError."""
 
-    gp_implementation = pm.gp.Marginal
+    gp_implementation = gpx.old.Marginal
 
     def test_catch_warnings(self):
         """Warning from using the old noise parameter."""
@@ -74,7 +74,7 @@ class TestMarginalSigmaParams(TestSigmaParams):
 class TestMarginalApproxSigmaParams(TestSigmaParams):
     R"""Tests for the deprecation warnings and raising ValueError"""
 
-    gp_implementation = pm.gp.MarginalApprox
+    gp_implementation = gpx.old.MarginalApprox
 
     @pytest.mark.xfail(reason="Possible shape problem, see #6366")
     def test_catch_warnings(self):
@@ -107,10 +107,10 @@ class TestMarginalVsMarginalApprox:
         self.x = np.linspace(-5, 5, 30)
         self.y = np.random.normal(0.25 * self.x, self.sigma)
         with pm.Model() as model:
-            cov_func = pm.gp.cov.Linear(1, c=0.0)
+            cov_func = gpx.old.cov.Linear(1, c=0.0)
             c = pm.Normal("c", mu=20.0, sigma=100.0)  # far from true value
-            mean_func = pm.gp.mean.Constant(c)
-            self.gp = pm.gp.Marginal(mean_func=mean_func, cov_func=cov_func)
+            mean_func = gpx.old.mean.Constant(c)
+            self.gp = gpx.old.Marginal(mean_func=mean_func, cov_func=cov_func)
             sigma = pm.HalfNormal("sigma", sigma=100)
             self.gp.marginal_likelihood("lik", self.x[:, None], self.y, sigma)
             self.map_full = pm.find_MAP(method="bfgs")  # bfgs seems to work much better than lbfgsb
@@ -137,10 +137,10 @@ class TestMarginalVsMarginalApprox:
         """
 
         with pm.Model() as model:
-            cov_func = pm.gp.cov.Linear(1, c=0.0)
+            cov_func = gpx.old.cov.Linear(1, c=0.0)
             c = pm.Normal("c", mu=20.0, sigma=100.0, initval=-500.0)
-            mean_func = pm.gp.mean.Constant(c)
-            gp = pm.gp.MarginalApprox(mean_func=mean_func, cov_func=cov_func, approx=approx)
+            mean_func = gpx.old.mean.Constant(c)
+            gp = gpx.old.MarginalApprox(mean_func=mean_func, cov_func=cov_func, approx=approx)
             sigma = pm.HalfNormal("sigma", sigma=100, initval=50.0)
             gp.marginal_likelihood("lik", self.x[:, None], self.x[:, None], self.y, sigma)
             map_approx = pm.find_MAP(method="bfgs")
@@ -171,26 +171,26 @@ class TestGPAdditive:
         self.X = np.random.randn(50, 3)
         self.y = np.random.randn(50)
         self.Xnew = np.random.randn(60, 3)
-        self.noise = pm.gp.cov.WhiteNoise(0.1)
+        self.noise = gpx.old.cov.WhiteNoise(0.1)
         self.covs = (
-            pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3]),
-            pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3]),
-            pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3]),
+            gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3]),
+            gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3]),
+            gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3]),
         )
-        self.means = (pm.gp.mean.Constant(0.5), pm.gp.mean.Constant(0.5), pm.gp.mean.Constant(0.5))
+        self.means = (gpx.old.mean.Constant(0.5), gpx.old.mean.Constant(0.5), gpx.old.mean.Constant(0.5))
 
     def testAdditiveMarginal(self):
         with pm.Model() as model1:
-            gp1 = pm.gp.Marginal(mean_func=self.means[0], cov_func=self.covs[0])
-            gp2 = pm.gp.Marginal(mean_func=self.means[1], cov_func=self.covs[1])
-            gp3 = pm.gp.Marginal(mean_func=self.means[2], cov_func=self.covs[2])
+            gp1 = gpx.old.Marginal(mean_func=self.means[0], cov_func=self.covs[0])
+            gp2 = gpx.old.Marginal(mean_func=self.means[1], cov_func=self.covs[1])
+            gp3 = gpx.old.Marginal(mean_func=self.means[2], cov_func=self.covs[2])
 
             gpsum = gp1 + gp2 + gp3
             fsum = gpsum.marginal_likelihood("f", self.X, self.y, sigma=self.noise)
             model1_logp = model1.compile_logp()({})
 
         with pm.Model() as model2:
-            gptot = pm.gp.Marginal(
+            gptot = gpx.old.Marginal(
                 mean_func=reduce(add, self.means), cov_func=reduce(add, self.covs)
             )
             fsum = gptot.marginal_likelihood("f", self.X, self.y, sigma=self.noise)
@@ -214,13 +214,13 @@ class TestGPAdditive:
         Xu = np.random.randn(10, 3)
         sigma = 0.1
         with pm.Model() as model1:
-            gp1 = pm.gp.MarginalApprox(
+            gp1 = gpx.old.MarginalApprox(
                 mean_func=self.means[0], cov_func=self.covs[0], approx=approx
             )
-            gp2 = pm.gp.MarginalApprox(
+            gp2 = gpx.old.MarginalApprox(
                 mean_func=self.means[1], cov_func=self.covs[1], approx=approx
             )
-            gp3 = pm.gp.MarginalApprox(
+            gp3 = gpx.old.MarginalApprox(
                 mean_func=self.means[2], cov_func=self.covs[2], approx=approx
             )
 
@@ -229,7 +229,7 @@ class TestGPAdditive:
             model1_logp = model1.compile_logp()({})
 
         with pm.Model() as model2:
-            gptot = pm.gp.MarginalApprox(
+            gptot = gpx.old.MarginalApprox(
                 mean_func=reduce(add, self.means), cov_func=reduce(add, self.covs), approx=approx
             )
             fsum = gptot.marginal_likelihood("f", self.X, Xu, self.y, sigma=sigma)
@@ -254,16 +254,16 @@ class TestGPAdditive:
 
     def testAdditiveLatent(self):
         with pm.Model() as model1:
-            gp1 = pm.gp.Latent(mean_func=self.means[0], cov_func=self.covs[0])
-            gp2 = pm.gp.Latent(mean_func=self.means[1], cov_func=self.covs[1])
-            gp3 = pm.gp.Latent(mean_func=self.means[2], cov_func=self.covs[2])
+            gp1 = gpx.old.Latent(mean_func=self.means[0], cov_func=self.covs[0])
+            gp2 = gpx.old.Latent(mean_func=self.means[1], cov_func=self.covs[1])
+            gp3 = gpx.old.Latent(mean_func=self.means[2], cov_func=self.covs[2])
 
             gpsum = gp1 + gp2 + gp3
             fsum = gpsum.prior("fsum", self.X, reparameterize=False)
             model1_logp = model1.compile_logp()({"fsum": self.y})
 
         with pm.Model() as model2:
-            gptot = pm.gp.Latent(mean_func=reduce(add, self.means), cov_func=reduce(add, self.covs))
+            gptot = gpx.old.Latent(mean_func=reduce(add, self.means), cov_func=reduce(add, self.covs))
             fsum = gptot.prior("fsum", self.X, reparameterize=False)
             model2_logp = model2.compile_logp()({"fsum": self.y})
         npt.assert_allclose(model1_logp, model2_logp, atol=0, rtol=1e-2)
@@ -281,25 +281,25 @@ class TestGPAdditive:
     def testAdditiveSparseRaises(self):
         # cant add different approximations
         with pm.Model() as model:
-            cov_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            gp1 = pm.gp.MarginalApprox(cov_func=cov_func, approx="DTC")
-            gp2 = pm.gp.MarginalApprox(cov_func=cov_func, approx="FITC")
+            cov_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            gp1 = gpx.old.MarginalApprox(cov_func=cov_func, approx="DTC")
+            gp2 = gpx.old.MarginalApprox(cov_func=cov_func, approx="FITC")
             with pytest.raises(Exception) as e_info:
                 gp1 + gp2
 
     def testAdditiveTypeRaises1(self):
         with pm.Model() as model:
-            cov_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            gp1 = pm.gp.MarginalApprox(cov_func=cov_func, approx="DTC")
-            gp2 = pm.gp.Marginal(cov_func=cov_func)
+            cov_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            gp1 = gpx.old.MarginalApprox(cov_func=cov_func, approx="DTC")
+            gp2 = gpx.old.Marginal(cov_func=cov_func)
             with pytest.raises(Exception) as e_info:
                 gp1 + gp2
 
     def testAdditiveTypeRaises2(self):
         with pm.Model() as model:
-            cov_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            gp1 = pm.gp.Latent(cov_func=cov_func)
-            gp2 = pm.gp.Marginal(cov_func=cov_func)
+            cov_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            gp1 = gpx.old.Latent(cov_func=cov_func)
+            gp2 = gpx.old.Marginal(cov_func=cov_func)
             with pytest.raises(Exception) as e_info:
                 gp1 + gp2
 
@@ -315,9 +315,9 @@ class TestMarginalVsLatent:
         Xnew = np.random.randn(30, 3)
         pnew = np.random.randn(30)
         with pm.Model() as model:
-            cov_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            mean_func = pm.gp.mean.Constant(0.5)
-            gp = pm.gp.Marginal(mean_func=mean_func, cov_func=cov_func)
+            cov_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            mean_func = gpx.old.mean.Constant(0.5)
+            gp = gpx.old.Marginal(mean_func=mean_func, cov_func=cov_func)
             f = gp.marginal_likelihood("f", X, y, sigma=0.0)
             p = gp.conditional("p", Xnew)
         self.logp = model.compile_logp()({"p": pnew})
@@ -328,9 +328,9 @@ class TestMarginalVsLatent:
 
     def testLatent1(self):
         with pm.Model() as model:
-            cov_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            mean_func = pm.gp.mean.Constant(0.5)
-            gp = pm.gp.Latent(mean_func=mean_func, cov_func=cov_func)
+            cov_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            mean_func = gpx.old.mean.Constant(0.5)
+            gp = gpx.old.Latent(mean_func=mean_func, cov_func=cov_func)
             f = gp.prior("f", self.X, reparameterize=False)
             p = gp.conditional("p", self.Xnew)
         assert tuple(f.shape.eval()) == (self.X.shape[0],)
@@ -340,9 +340,9 @@ class TestMarginalVsLatent:
 
     def testLatent2(self):
         with pm.Model() as model:
-            cov_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            mean_func = pm.gp.mean.Constant(0.5)
-            gp = pm.gp.Latent(mean_func=mean_func, cov_func=cov_func)
+            cov_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            mean_func = gpx.old.mean.Constant(0.5)
+            gp = gpx.old.Latent(mean_func=mean_func, cov_func=cov_func)
             f = gp.prior("f", self.X, reparameterize=True)
             p = gp.conditional("p", self.Xnew)
         assert tuple(f.shape.eval()) == (self.X.shape[0],)
@@ -366,8 +366,8 @@ class TestTP:
         pnew = rng.standard_normal(size=(30,))
 
         with pm.Model() as model1:
-            cov_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            gp = pm.gp.Latent(cov_func=cov_func)
+            cov_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            gp = gpx.old.Latent(cov_func=cov_func)
             f = gp.prior("f", X, reparameterize=False)
             p = gp.conditional("p", Xnew)
         self.gp_latent_logp = model1.compile_logp()({"f": y, "p": pnew})
@@ -379,8 +379,8 @@ class TestTP:
 
     def testTPvsLatent(self):
         with pm.Model() as model:
-            scale_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            tp = pm.gp.TP(scale_func=scale_func, nu=self.nu)
+            scale_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            tp = gpx.old.TP(scale_func=scale_func, nu=self.nu)
             f = tp.prior("f", self.X, reparameterize=False)
             p = tp.conditional("p", self.Xnew)
         assert tuple(f.shape.eval()) == (self.X.shape[0],)
@@ -390,8 +390,8 @@ class TestTP:
 
     def testTPvsLatentReparameterized(self):
         with pm.Model() as model:
-            scale_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            tp = pm.gp.TP(scale_func=scale_func, nu=self.nu)
+            scale_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            tp = gpx.old.TP(scale_func=scale_func, nu=self.nu)
             f = tp.prior("f", self.X, reparameterize=True)
             p = tp.conditional("p", self.Xnew)
         assert tuple(f.shape.eval()) == (self.X.shape[0],)
@@ -403,9 +403,9 @@ class TestTP:
 
     def testAdditiveTPRaises(self):
         with pm.Model() as model:
-            scale_func = pm.gp.cov.ExpQuad(3, [0.1, 0.2, 0.3])
-            gp1 = pm.gp.TP(scale_func=scale_func, nu=10)
-            gp2 = pm.gp.TP(scale_func=scale_func, nu=10)
+            scale_func = gpx.old.cov.ExpQuad(3, [0.1, 0.2, 0.3])
+            gp1 = gpx.old.TP(scale_func=scale_func, nu=10)
+            gp2 = gpx.old.TP(scale_func=scale_func, nu=10)
             with pytest.raises(Exception) as e_info:
                 gp1 + gp2
 
@@ -435,13 +435,13 @@ class TestLatentKron:
         ls = 0.2
         with pm.Model() as latent_model:
             self.cov_funcs = (
-                pm.gp.cov.ExpQuad(1, ls),
-                pm.gp.cov.ExpQuad(1, ls),
-                pm.gp.cov.ExpQuad(1, ls),
+                gpx.old.cov.ExpQuad(1, ls),
+                gpx.old.cov.ExpQuad(1, ls),
+                gpx.old.cov.ExpQuad(1, ls),
             )
-            cov_func = pm.gp.cov.Kron(self.cov_funcs)
-            self.mean = pm.gp.mean.Constant(0.5)
-            gp = pm.gp.Latent(mean_func=self.mean, cov_func=cov_func)
+            cov_func = gpx.old.cov.Kron(self.cov_funcs)
+            self.mean = gpx.old.mean.Constant(0.5)
+            gp = gpx.old.Latent(mean_func=self.mean, cov_func=cov_func)
             f = gp.prior("f", self.X)
             p = gp.conditional("p", self.Xnew)
         chol = np.linalg.cholesky(cov_func(self.X).eval())
@@ -450,7 +450,7 @@ class TestLatentKron:
 
     def testLatentKronvsLatent(self):
         with pm.Model() as kron_model:
-            kron_gp = pm.gp.LatentKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
+            kron_gp = gpx.old.LatentKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
             f = kron_gp.prior("f", self.Xs)
             p = kron_gp.conditional("p", self.Xnew)
         assert tuple(f.shape.eval()) == (self.X.shape[0],)
@@ -460,14 +460,14 @@ class TestLatentKron:
 
     def testLatentKronRaisesAdditive(self):
         with pm.Model() as kron_model:
-            gp1 = pm.gp.LatentKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
-            gp2 = pm.gp.LatentKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
+            gp1 = gpx.old.LatentKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
+            gp2 = gpx.old.LatentKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
         with pytest.raises(TypeError):
             gp1 + gp2
 
     def testLatentKronRaisesSizes(self):
         with pm.Model() as kron_model:
-            gp = pm.gp.LatentKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
+            gp = gpx.old.LatentKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
         with pytest.raises(ValueError):
             gp.prior("f", Xs=[np.linspace(0, 1, 7)[:, None], np.linspace(0, 1, 5)[:, None]])
 
@@ -494,13 +494,13 @@ class TestMarginalKron:
         ls = 0.2
         with pm.Model() as model:
             self.cov_funcs = [
-                pm.gp.cov.ExpQuad(1, ls),
-                pm.gp.cov.ExpQuad(1, ls),
-                pm.gp.cov.ExpQuad(1, ls),
+                gpx.old.cov.ExpQuad(1, ls),
+                gpx.old.cov.ExpQuad(1, ls),
+                gpx.old.cov.ExpQuad(1, ls),
             ]
-            cov_func = pm.gp.cov.Kron(self.cov_funcs)
-            self.mean = pm.gp.mean.Constant(0.5)
-            gp = pm.gp.Marginal(mean_func=self.mean, cov_func=cov_func)
+            cov_func = gpx.old.cov.Kron(self.cov_funcs)
+            self.mean = gpx.old.mean.Constant(0.5)
+            gp = gpx.old.Marginal(mean_func=self.mean, cov_func=cov_func)
             f = gp.marginal_likelihood("f", self.X, self.y, sigma=self.sigma)
             p = gp.conditional("p", self.Xnew)
             self.mu, self.cov = gp.predict(self.Xnew)
@@ -508,7 +508,7 @@ class TestMarginalKron:
 
     def testMarginalKronvsMarginalpredict(self):
         with pm.Model() as kron_model:
-            kron_gp = pm.gp.MarginalKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
+            kron_gp = gpx.old.MarginalKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
             f = kron_gp.marginal_likelihood("f", self.Xs, self.y, sigma=self.sigma)
             p = kron_gp.conditional("p", self.Xnew)
             mu, cov = kron_gp.predict(self.Xnew)
@@ -522,7 +522,7 @@ class TestMarginalKron:
 
     def testMarginalKronvsMarginal(self):
         with pm.Model() as kron_model:
-            kron_gp = pm.gp.MarginalKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
+            kron_gp = gpx.old.MarginalKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
             f = kron_gp.marginal_likelihood("f", self.Xs, self.y, sigma=self.sigma)
             p = kron_gp.conditional("p", self.Xnew)
         kron_logp = kron_model.compile_logp()({"p": self.pnew})
@@ -530,7 +530,7 @@ class TestMarginalKron:
 
     def testMarginalKronRaises(self):
         with pm.Model() as kron_model:
-            gp1 = pm.gp.MarginalKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
-            gp2 = pm.gp.MarginalKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
+            gp1 = gpx.old.MarginalKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
+            gp2 = gpx.old.MarginalKron(mean_func=self.mean, cov_funcs=self.cov_funcs)
         with pytest.raises(TypeError):
             gp1 + gp2
