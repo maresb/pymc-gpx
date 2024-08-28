@@ -21,7 +21,7 @@ jobs:
     - uses: prefix-dev/setup-pixi@v0.8.1
       with:
         pixi-version: v0.26.1
-        cache: true
+        cache: false
         locked: false
     # List all files excluding .git and .pixi
     - run: find | grep -v -e '/\.git/' -e '/\.pixi/' -e '/\.mypy-cache/'
