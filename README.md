@@ -4,6 +4,8 @@
 
 -----
 
+Hello world.
+
 Unstable and eXperimental manifold-oriented Gaussian processes for PyMC.
 
 The goal is to sort out the API and eventually merge it into PyMC. We are mainly focused on HSGP, but may also tweak the normal GP implementation.
