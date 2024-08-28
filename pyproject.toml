@@ -41,9 +41,6 @@ source = "vcs"
 tag-pattern = '''^v(\d+\.\d+\.\d+)$'''
 raw-options = { version_scheme = "no-guess-dev" }
 
-[tool.hatch.build.hooks.vcs]
-version-file = "src/gpx/_version.py"
-
 [tool.ruff]
 line-length = 100
 src = ["src"]
