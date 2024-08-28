@@ -23,7 +23,8 @@ jobs:
         pixi-version: v0.26.1
         cache: true
         locked: false
-    - run: ls -alR
+    # List all files excluding .git and .pixi
+    - run: find | grep -v -e '/\.git/' -e '/\.pixi/' -e '/\.mypy-cache/'
   pytest:
     name: Run gpx-specific tests
     runs-on: ubuntu-latest
