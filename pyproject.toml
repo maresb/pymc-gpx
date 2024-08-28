@@ -98,6 +98,7 @@ ban-relative-imports = "all"
   "B905",
   "A001",
   "I001",
+  "I001",
 ]
 "tests/old/*" = ["E501", "F841", "B007", "I001"]
 
