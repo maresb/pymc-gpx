@@ -3485,9 +3485,9 @@ packages:
   timestamp: 1720728732585
 - kind: pypi
   name: pymc-gpx
-  version: 0.0.post1.dev7+g1b15d83.d20240827
+  version: 0.0.1.post1.dev5+gd33f5f0.d20240828
   path: .
-  sha256: cda1adb7abbbc114924f147ffd31790e5e6f9ac4956b2c059175c63f48ebfe4a
+  sha256: 3db61cb7c0f5e07ba1564f264c9ee2af9e6cc41046c05ca1a6ec0976dae8678f
   requires_dist:
   - pymc>=5
   requires_python: '>=3.10'
