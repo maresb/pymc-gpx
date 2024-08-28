@@ -10,6 +10,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  listfiles:
+    name: List files
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - uses: prefix-dev/setup-pixi@v0.8.1
+      with:
+        pixi-version: v0.26.1
+        cache: true
+        locked: false
+    - run: ls -alR
   pytest:
     name: Run gpx-specific tests
     runs-on: ubuntu-latest
