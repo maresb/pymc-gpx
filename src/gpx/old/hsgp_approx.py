@@ -56,18 +56,48 @@ def calc_eigenvectors(
     L: TensorLike,
     eigvals: TensorLike,
     m: Sequence[int],
+    boundary_condition: str = "dirichlet",
 ):
     """Calculate eigenvectors of the Laplacian. These are used as basis vectors in the HSGP
     approximation.
     """
-    m_star = int(np.prod(m))
+    if boundary_condition.lower() == "dirichlet":
+        func = pt.sin
+    elif boundary_condition.lower() == "neumann":
+        func = pt.cos
+    elif boundary_condition.lower() == "mixed":
+        # define domain boundaries for weighting
+        a, b = np.min(Xs), np.max(Xs)
 
+        # calculate weights for Dirichlet (w_D) and Neumann (w_N) conditions
+        w_N = (Xs - a) / (b - a)  # low near left boundary, high near right
+        w_D = 1 - w_N  # high near left boundary, low near right
+
+        # normalize weights
+        w_D = w_D / (w_D + w_N)
+        w_N = w_N / (w_D + w_N)
+    else:
+        raise ValueError(f"Boundary condition '{boundary_condition}' is not valid.")
+
+    m_star = int(np.prod(m))
     phi = pt.ones((Xs.shape[0], m_star))
+
     for d in range(len(m)):
         c = 1.0 / pt.sqrt(L[d])
         term1 = pt.sqrt(eigvals[:, d])
         term2 = pt.tile(Xs[:, d][:, None], m_star) + L[d]
-        phi *= c * pt.sin(term1 * term2)
+
+        if boundary_condition.lower() == "mixed":
+            # Dirichlet (left) boundary
+            phi_D = pt.sin(term1 * term2)
+
+            # Neumann (right) boundary
+            phi_N = pt.cos(term1 * term2)
+
+            # Combine both conditions
+            phi *= c * (w_D * phi_D + w_N * phi_N)
+        else:
+            phi *= c * func(term1 * term2)
 
     return phi
 
