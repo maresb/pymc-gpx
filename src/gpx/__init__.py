@@ -1,9 +1,7 @@
-try:
-    from gpx._version import __version__
-except ImportError as e:
-    raise RuntimeError(
-        "Package 'gpx' is not correctly built or installed. "
-        "If you are developing 'gpx', please reinstall it into your environment."
-    ) from e
+from importlib.metadata import version
+
+# Warning: this is the version as of the last build or install,
+# so it might not be up-to-date during development.
+__version__ = version("pymc-gpx")
 
 __all__ = ["__version__"]
